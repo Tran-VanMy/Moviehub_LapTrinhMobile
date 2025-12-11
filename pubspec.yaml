@@ -46,6 +46,8 @@ dependencies:
   shimmer: ^3.0.0
   # Trailer player
   youtube_player_flutter: ^9.0.3
+  # Trailer player (iframe – hỗ trợ web tốt)
+  youtube_player_iframe: ^5.1.2
 
 dev_dependencies:
   flutter_test:

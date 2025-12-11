@@ -13,7 +13,7 @@ class MovieHubApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       onGenerateRoute: AppRouter.onGenerateRoute,
-      initialRoute: AppRouter.home,
+      initialRoute: AppRouter.login,
     );
   }
 }

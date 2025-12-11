@@ -1,11 +1,11 @@
 // Path: lib/features/movies/presentation/pages/movie_detail_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:moviehub/features/movies/data/models/video.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../../../../core/constants.dart';
 import '../../data/models/movie.dart';
+import '../../data/models/video.dart';
 import '../providers/movie_providers.dart';
 import '../providers/watchlist_providers.dart';
 import '../widgets/cast_list.dart';
@@ -31,7 +31,7 @@ class MovieDetailPage extends ConsumerWidget {
           return CustomScrollView(
             slivers: [
               SliverAppBar(
-                expandedHeight: 280,
+                expandedHeight: 260,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   background: detail.backdropPath.isEmpty
@@ -49,7 +49,6 @@ class MovieDetailPage extends ConsumerWidget {
                           : Icons.bookmark_outline_rounded,
                     ),
                     onPressed: () {
-                      // Save/remove movie from offline watchlist
                       ref.read(watchlistProvider.notifier).toggle(
                             MovieLiteMapper.fromDetail(detail),
                           );
@@ -94,7 +93,6 @@ class MovieDetailPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
 
-                      // Genres
                       Wrap(
                         spacing: 8,
                         children: detail.genres
@@ -108,21 +106,19 @@ class MovieDetailPage extends ConsumerWidget {
                       ),
 
                       const SizedBox(height: 12),
-
-                      // Overview
                       Text(
                         detail.overview,
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(height: 18),
 
-                      // ===== Trailer =====
+                      // ===== Trailer với youtube_player_iframe =====
                       videosAsync.when(
                         data: (videos) {
-                          // ✅ Tìm trailer YouTube (nullable an toàn)
                           Video? ytTrailer;
                           for (final v in videos) {
-                            final isYoutube = v.site.toLowerCase() == "youtube";
+                            final isYoutube =
+                                v.site.toLowerCase() == "youtube";
                             final isTrailer =
                                 v.type.toLowerCase().contains("trailer");
                             if (isYoutube && isTrailer) {
@@ -130,17 +126,17 @@ class MovieDetailPage extends ConsumerWidget {
                               break;
                             }
                           }
-
-                          // Nếu không có trailer thì ẩn hẳn section
                           if (ytTrailer == null) {
                             return const SizedBox.shrink();
                           }
 
-                          final controller = YoutubePlayerController(
-                            initialVideoId: ytTrailer.key,
-                            flags: const YoutubePlayerFlags(
-                              autoPlay: false,
-                              mute: false,
+                          final controller = YoutubePlayerController.fromVideoId(
+                            videoId: ytTrailer.key,
+                            autoPlay: false,
+                            params: const YoutubePlayerParams(
+                              showFullscreenButton: true,
+                              showControls: true,
+                              strictRelatedVideos: true,
                             ),
                           );
 
@@ -157,15 +153,19 @@ class MovieDetailPage extends ConsumerWidget {
                               const SizedBox(height: 8),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(16),
-                                child: YoutubePlayer(controller: controller),
+                                child: AspectRatio(
+                                  aspectRatio: 16 / 9,
+                                  child: YoutubePlayer(
+                                    controller: controller,
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 18),
                             ],
                           );
                         },
-                        loading: () => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
                         error: (_, __) => const SizedBox.shrink(),
                       ),
 
@@ -198,7 +198,8 @@ class MovieDetailPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 8),
                               SizedBox(
-                                height: 240,
+                                // tăng chiều cao để không overflow
+                                height: 280,
                                 child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
                                   itemBuilder: (_, i) =>

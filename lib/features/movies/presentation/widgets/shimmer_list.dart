@@ -8,7 +8,8 @@ class ShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 240,
+      // cao hơn chút, tương đương list trending
+      height: 290,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
@@ -17,7 +18,7 @@ class ShimmerList extends StatelessWidget {
           highlightColor: Colors.grey.shade100,
           child: Container(
             width: 140,
-            height: 200,
+            height: 230,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),

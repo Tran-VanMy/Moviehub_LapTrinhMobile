@@ -15,11 +15,11 @@ Trang tài liệu chính thức:
 Base URL: https://api.themoviedb.org/3
 
 Các endpoint trong app:
-- Trending movies: GET /trending/movie/day Link: https://developer.themoviedb.org/reference/trending-all?utm_source=chatgpt.com
-- Now Playing: GET /movie/now_playing Link: https://developer.themoviedb.org/reference/movie-now-playing-list?utm_source=chatgpt.com
-- Top Rated: GET /movie/top_rated Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Movie details: GET /movie/{movie_id} Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Credits (cast): GET /movie/{movie_id}/credits Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Videos (trailer): GET /movie/{movie_id}/videos Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Similar movies: GET /movie/{movie_id}/similar Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Search: GET /search/movie Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Trending movies (lấy phim trending trong ngày): GET /trending/movie/day Link: https://developer.themoviedb.org/reference/trending-all?utm_source=chatgpt.com
+- Now Playing (phim đang chiếu tại rạp): GET /movie/now_playing Link: https://developer.themoviedb.org/reference/movie-now-playing-list?utm_source=chatgpt.com
+- Top Rated (phim có điểm đánh giá cao): GET /movie/top_rated Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Movie details (chi tiết 1 phim (overview, runtime, genres, backdrop…)): GET /movie/{movie_id} Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Credits (cast) (danh sách diễn viên): GET /movie/{movie_id}/credits Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Videos (trailer) (list trailer/teaser, dùng key YouTube): GET /movie/{movie_id}/videos Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Similar movies (phim tương tự): GET /movie/{movie_id}/similar Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Search (tìm phim theo tên, param query): GET /search/movie Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
