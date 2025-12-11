@@ -1,0 +1,25 @@
+https://fakestoreapi.com/docs
+https://pub.dev/packages/dio/install
+https://app.quicktype.io/?l=dart
+https://dummyjson.com/
+
+
+Web API Movie TMDB: https://www.themoviedb.org/?language=vi
+
+My API KEY: https://www.themoviedb.org/settings/api
+
+Trang tài liệu chính thức:
+- TMDB Getting Started: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- TMDB Authentication (Bearer Token / api_key): https://developer.themoviedb.org/docs/authentication-application?utm_source=chatgpt.com
+
+Base URL: https://api.themoviedb.org/3
+
+Các endpoint trong app:
+- Trending movies: GET /trending/movie/day Link: https://developer.themoviedb.org/reference/trending-all?utm_source=chatgpt.com
+- Now Playing: GET /movie/now_playing Link: https://developer.themoviedb.org/reference/movie-now-playing-list?utm_source=chatgpt.com
+- Top Rated: GET /movie/top_rated Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Movie details: GET /movie/{movie_id} Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Credits (cast): GET /movie/{movie_id}/credits Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Videos (trailer): GET /movie/{movie_id}/videos Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Similar movies: GET /movie/{movie_id}/similar Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Search: GET /search/movie Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
