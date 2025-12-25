@@ -21,6 +21,7 @@ class MovieDetailPage extends ConsumerWidget {
     final castAsync = ref.watch(movieCreditsProvider(movieId));
     final videosAsync = ref.watch(movieVideosProvider(movieId));
     final similarAsync = ref.watch(similarMoviesProvider(movieId));
+    final recoAsync = ref.watch(recommendationsProvider(movieId));
     final watchlist = ref.watch(watchlistProvider);
 
     return Scaffold(
@@ -43,6 +44,9 @@ class MovieDetailPage extends ConsumerWidget {
                 ),
                 actions: [
                   IconButton(
+                    tooltip: isSaved
+                        ? "Remove from watchlist"
+                        : "Save to watchlist",
                     icon: Icon(
                       isSaved
                           ? Icons.bookmark_rounded
@@ -88,6 +92,8 @@ class MovieDetailPage extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Text(detail.voteAverage.toStringAsFixed(1)),
                           const SizedBox(width: 10),
+                          const Icon(Icons.schedule_rounded, size: 18),
+                          const SizedBox(width: 4),
                           Text("${detail.runtime} min"),
                         ],
                       ),
@@ -98,6 +104,10 @@ class MovieDetailPage extends ConsumerWidget {
                         children: detail.genres
                             .map(
                               (g) => Chip(
+                                avatar: const Icon(
+                                  Icons.local_movies_rounded,
+                                  size: 16,
+                                ),
                                 label: Text(g),
                                 backgroundColor: Colors.white,
                               ),
@@ -108,7 +118,7 @@ class MovieDetailPage extends ConsumerWidget {
                       const SizedBox(height: 12),
                       Text(
                         detail.overview,
-                        style: const TextStyle(fontSize: 15),
+                        style: const TextStyle(fontSize: 15, height: 1.4),
                       ),
                       const SizedBox(height: 18),
 
@@ -130,7 +140,8 @@ class MovieDetailPage extends ConsumerWidget {
                             return const SizedBox.shrink();
                           }
 
-                          final controller = YoutubePlayerController.fromVideoId(
+                          final controller =
+                              YoutubePlayerController.fromVideoId(
                             videoId: ytTrailer.key,
                             autoPlay: false,
                             params: const YoutubePlayerParams(
@@ -164,15 +175,15 @@ class MovieDetailPage extends ConsumerWidget {
                             ],
                           );
                         },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
+                        loading: () => const Center(
+                            child: CircularProgressIndicator()),
                         error: (_, __) => const SizedBox.shrink(),
                       ),
 
-                      // ===== Cast =====
+                      // ===== Cast (có mũi tên < > và click ra trang người nổi tiếng) =====
                       castAsync.when(
                         data: (cast) => CastList(
-                          cast: cast.take(12).toList(),
+                          cast: cast.take(50).toList(),
                         ),
                         loading: () => const SizedBox.shrink(),
                         error: (_, __) => const SizedBox.shrink(),
@@ -197,17 +208,37 @@ class MovieDetailPage extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              SizedBox(
-                                // tăng chiều cao để không overflow
-                                height: 280,
-                                child: ListView.separated(
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (_, i) =>
-                                      MovieCard(movie: movies[i]),
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(width: 12),
-                                  itemCount: movies.length,
+                              _MovieHorizontalListWithArrows(
+                                movies: movies,
+                              ),
+                            ],
+                          );
+                        },
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // ===== Recommendations =====
+                      recoAsync.when(
+                        data: (movies) {
+                          if (movies.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "You may also like",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
                                 ),
+                              ),
+                              const SizedBox(height: 8),
+                              _MovieHorizontalListWithArrows(
+                                movies: movies,
                               ),
                             ],
                           );
@@ -239,6 +270,107 @@ class MovieLiteMapper {
       posterPath: detail.backdropPath,
       voteAverage: detail.voteAverage,
       releaseDate: "",
+    );
+  }
+}
+
+/// List phim ngang có nút < > dùng cho Similar / You may also like
+class _MovieHorizontalListWithArrows extends StatefulWidget {
+  const _MovieHorizontalListWithArrows({required this.movies});
+
+  final List<Movie> movies;
+
+  @override
+  State<_MovieHorizontalListWithArrows> createState() =>
+      _MovieHorizontalListWithArrowsState();
+}
+
+class _MovieHorizontalListWithArrowsState
+    extends State<_MovieHorizontalListWithArrows> {
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollBy(double offset) {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final target =
+        (_scrollController.offset + offset).clamp(0.0, maxScroll.toDouble());
+    _scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 300,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ListView.separated(
+            controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (_, i) => MovieCard(movie: widget.movies[i]),
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemCount: widget.movies.length,
+          ),
+
+          // Nút trái
+          Positioned(
+            left: 0,
+            child: _MovieArrowButton(
+              icon: Icons.chevron_left_rounded,
+              onTap: () => _scrollBy(-220),
+            ),
+          ),
+
+          // Nút phải
+          Positioned(
+            right: 0,
+            child: _MovieArrowButton(
+              icon: Icons.chevron_right_rounded,
+              onTap: () => _scrollBy(220),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MovieArrowButton extends StatelessWidget {
+  const _MovieArrowButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withOpacity(0.45),
+      shape: const CircleBorder(),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(
+            icon,
+            size: 24,
+            color: Colors.white,
+          ),
+        ),
+      ),
     );
   }
 }

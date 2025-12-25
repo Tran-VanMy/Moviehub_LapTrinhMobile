@@ -15,11 +15,77 @@ Trang tài liệu chính thức:
 Base URL: https://api.themoviedb.org/3
 
 Các endpoint trong app:
-- Trending movies (lấy phim trending trong ngày): GET /trending/movie/day Link: https://developer.themoviedb.org/reference/trending-all?utm_source=chatgpt.com
-- Now Playing (phim đang chiếu tại rạp): GET /movie/now_playing Link: https://developer.themoviedb.org/reference/movie-now-playing-list?utm_source=chatgpt.com
-- Top Rated (phim có điểm đánh giá cao): GET /movie/top_rated Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Movie details (chi tiết 1 phim (overview, runtime, genres, backdrop…)): GET /movie/{movie_id} Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Credits (cast) (danh sách diễn viên): GET /movie/{movie_id}/credits Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Videos (trailer) (list trailer/teaser, dùng key YouTube): GET /movie/{movie_id}/videos Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Similar movies (phim tương tự): GET /movie/{movie_id}/similar Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
-- Search (tìm phim theo tên, param query): GET /search/movie Link: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+- Trending movies (lấy phim trending trong ngày): 
+GET /trending/movie/day 
+Docs: https://developer.themoviedb.org/reference/trending-all?utm_source=chatgpt.com
+
+- Now Playing (phim đang chiếu tại rạp): 
+GET /movie/now_playing 
+Docs: https://developer.themoviedb.org/reference/movie-now-playing-list?utm_source=chatgpt.com
+
+- Top Rated (phim có điểm đánh giá cao): 
+GET /movie/top_rated 
+Docs: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+
+- Search movie (tìm kiếm phim theo tên): 
+GET /search/movie 
+Docs: https://developer.themoviedb.org/reference/search-movie?utm_source=chatgpt.com
+
+- Movie details (chi tiết 1 phim (overview, runtime, genres, backdrop…)): 
+GET /movie/{movie_id} 
+Docs: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+
+- Credits (cast) (danh sách diễn viên): 
+GET /movie/{movie_id}/credits 
+Docs: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+
+- Videos (trailer) (list trailer/teaser, dùng key YouTube): 
+GET /movie/{movie_id}/videos 
+Docs: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+
+- Similar movies (phim tương tự): 
+GET /movie/{movie_id}/similar 
+Docs: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+
+- Recommendations (You may also like): 
+GET /movie/{movie_id}/recommendations 
+Docs: https://developer.themoviedb.org/reference/movie-recommendations?utm_source=chatgpt.com
+
+- Genres (Danh sách thể loại): 
+GET /genre/movie/list 
+Docs: https://developer.themoviedb.org/reference/genre-movie-list?utm_source=chatgpt.com
+
+- Discover Movies (lọc nâng cao: thể loại, năm, rating, sort...): 
+GET /discover/movie 
+Docs: https://developer.themoviedb.org/reference/discover-movie?utm_source=chatgpt.com
+
+- Popular People (Danh sách người nổi tiếng): 
+GET /person/popular 
+Docs: https://developer.themoviedb.org/reference/person-popular?utm_source=chatgpt.com
+
+- Person Detail (Chi tiết 1 người nổi tiếng): 
+GET /person/{person_id} 
+Docs: https://developer.themoviedb.org/reference/person-details?utm_source=chatgpt.com
+
+- Person Movie Credits (Danh sách phim người đó tham gia): 
+GET /person/{person_id}/movie_credits 
+Docs: https://developer.themoviedb.org/reference/person-movie-credits?utm_source=chatgpt.com
+
+- Search (tìm phim theo tên, param query): 
+GET /search/movie 
+Docs: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
+
+- Image Base URL (Lấy poster, backdrop, avatar): 
+Link: https://image.tmdb.org/t/p/w500
+Docs: https://developer.themoviedb.org/docs/image-basics?utm_source=chatgpt.com
+
+Tổng kết API mà project MovieHub đã dùng (Full List):
+| Nhóm         | Endpoint                                            |
+| ------------ | --------------------------------------------------- |
+| Movies       | Trending, Now Playing, Top Rated, Movie Detail      |
+| Movies Extra | Credits, Videos, Similar, Recommendations           |
+| Search       | Search Movies                                       |
+| Discover     | Discover Movies                                     |
+| Genres       | List Genres                                         |
+| People       | Popular People, Person Detail, Person Movie Credits |
+| Images       | Base Image URL                                      |

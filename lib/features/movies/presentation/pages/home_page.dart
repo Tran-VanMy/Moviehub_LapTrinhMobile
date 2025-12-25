@@ -17,6 +17,8 @@ class HomePage extends ConsumerWidget {
     final nowPlaying = ref.watch(nowPlayingProvider);
     final topRated = ref.watch(topRatedProvider);
 
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -28,28 +30,60 @@ class HomePage extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.only(bottom: 24),
             children: [
-              // ===== Header =====
+              // ===== Header mới: có tagline + các icon hành động =====
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Icon(Icons.movie_filter_rounded, size: 28),
-                    const SizedBox(width: 8),
-                    const Text(
-                      "MovieHub",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(14),
                       ),
+                      child: Icon(
+                        Icons.movie_filter_rounded,
+                        size: 26,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "MovieHub",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          "Khám phá phim chất lượng từ TMDB",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     IconButton(
+                      tooltip: "Search",
                       icon: const Icon(Icons.search_rounded),
                       onPressed: () =>
                           Navigator.pushNamed(context, AppRouter.search),
                     ),
                     IconButton(
+                      tooltip: "Discover",
+                      icon: const Icon(Icons.explore_rounded),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, AppRouter.discover),
+                    ),
+                    IconButton(
+                      tooltip: "Watchlist",
                       icon: const Icon(Icons.bookmark_rounded),
                       onPressed: () =>
                           Navigator.pushNamed(context, AppRouter.watchlist),
@@ -58,9 +92,78 @@ class HomePage extends ConsumerWidget {
                 ),
               ),
 
+              // ===== Banner nhỏ giới thiệu =====
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  elevation: 0.7,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      gradient: LinearGradient(
+                        colors: [
+                          theme.colorScheme.primary.withOpacity(0.95),
+                          theme.colorScheme.primary.withOpacity(0.75),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amber,
+                          size: 30,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Tìm kiếm, lọc phim theo thể loại, năm, điểm đánh giá và nhiều hơn nữa với Discover.",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: theme.colorScheme.primary,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, AppRouter.discover),
+                          icon: const Icon(Icons.explore_rounded, size: 18),
+                          label: const Text(
+                            "Discover",
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
               // ===== Trending Today =====
               SectionHeader(
                 title: "🔥 Trending Today",
+                trailingIcon: Icons.local_fire_department_rounded,
                 onSeeAll: () => Navigator.pushNamed(
                   context,
                   AppRouter.allMovies,
@@ -78,11 +181,33 @@ class HomePage extends ConsumerWidget {
                           ref.read(trendingProvider.notifier).fetchNext(),
                     ),
 
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
+
+
+              // ===== People short cut =====
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: OutlinedButton.icon(
+                  onPressed: () =>
+                      Navigator.pushNamed(context, AppRouter.people),
+                  icon: const Icon(Icons.people_alt_rounded),
+                  label: const Text("Khám phá người nổi tiếng"),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 10),
 
               // ===== Now Playing =====
               SectionHeader(
                 title: "🎬 Now Playing",
+                trailingIcon: Icons.play_circle_fill_rounded,
                 onSeeAll: () => Navigator.pushNamed(
                   context,
                   AppRouter.allMovies,
@@ -100,11 +225,12 @@ class HomePage extends ConsumerWidget {
                           ref.read(nowPlayingProvider.notifier).fetchNext(),
                     ),
 
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
 
               // ===== Top Rated =====
               SectionHeader(
                 title: "⭐ Top Rated",
+                trailingIcon: Icons.emoji_events_rounded,
                 onSeeAll: () => Navigator.pushNamed(
                   context,
                   AppRouter.allMovies,
@@ -121,6 +247,10 @@ class HomePage extends ConsumerWidget {
                       onLoadMore: () =>
                           ref.read(topRatedProvider.notifier).fetchNext(),
                     ),
+
+              const SizedBox(height: 8),
+
+
             ],
           ),
         ),
@@ -140,8 +270,7 @@ class _VerticalMovieList extends StatelessWidget {
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
       onNotification: (scroll) {
-        if (scroll.metrics.pixels >=
-            scroll.metrics.maxScrollExtent - 200) {
+        if (scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
           onLoadMore();
         }
         return false;
