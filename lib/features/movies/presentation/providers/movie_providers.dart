@@ -1,5 +1,7 @@
 // Path: lib/features/movies/presentation/providers/movie_providers.dart
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/tmdb_api.dart';
 import '../../domain/movie_repository.dart';
 import '../../data/models/movie.dart';
@@ -10,6 +12,11 @@ import '../../data/models/genre.dart';
 import '../../data/models/person.dart';
 import '../../data/models/person_detail.dart';
 
+// NEW
+import '../../data/models/review.dart';
+import '../../data/models/watch_provider.dart';
+import '../../../../core/settings/settings_provider.dart';
+
 /// Provider khởi tạo TmdbApi
 final apiProvider = Provider<TmdbApi>((ref) => TmdbApi());
 
@@ -17,14 +24,14 @@ final apiProvider = Provider<TmdbApi>((ref) => TmdbApi());
 final repoProvider =
     Provider<MovieRepository>((ref) => MovieRepository(ref.read(apiProvider)));
 
-/// State cho list movie có phân trang (trending, now playing, top rated, discover,...)
+/// State cho list movie có phân trang
 class MovieListState {
   final List<Movie> movies;
   final int page;
   final bool isLoading;
   final bool hasMore;
 
-  MovieListState({
+  const MovieListState({
     this.movies = const [],
     this.page = 1,
     this.isLoading = false,
@@ -45,15 +52,15 @@ class MovieListState {
       );
 }
 
-/// State generic notifier cho các list movie dạng "load more"
+/// Notifier generic cho list phim dạng "load more"
 class MovieListNotifier extends StateNotifier<MovieListState> {
-  MovieListNotifier(this._repo, {required this.type}) : super(MovieListState()) {
+  MovieListNotifier(this._repo, {required this.type}) : super(const MovieListState()) {
     fetchNext();
   }
 
   final MovieRepository _repo;
 
-  /// type: "trending", "nowplaying", "toprated"
+  /// type: "trending", "nowplaying", "toprated", "popular", "upcoming"
   final String type;
 
   Future<void> fetchNext() async {
@@ -62,12 +69,25 @@ class MovieListNotifier extends StateNotifier<MovieListState> {
 
     try {
       List<Movie> newMovies;
-      if (type == "trending") {
-        newMovies = await _repo.trending(state.page);
-      } else if (type == "nowplaying") {
-        newMovies = await _repo.nowPlaying(state.page);
-      } else {
-        newMovies = await _repo.topRated(state.page);
+
+      switch (type) {
+        case "trending":
+          newMovies = await _repo.trending(state.page);
+          break;
+        case "nowplaying":
+          newMovies = await _repo.nowPlaying(state.page);
+          break;
+        case "toprated":
+          newMovies = await _repo.topRated(state.page);
+          break;
+        case "popular":
+          newMovies = await _repo.popular(state.page);
+          break;
+        case "upcoming":
+          newMovies = await _repo.upcoming(state.page);
+          break;
+        default:
+          newMovies = [];
       }
 
       state = state.copyWith(
@@ -83,7 +103,8 @@ class MovieListNotifier extends StateNotifier<MovieListState> {
 }
 
 // ====== Providers list phim chính trên Home ======
-final trendingProvider = StateNotifierProvider<MovieListNotifier, MovieListState>(
+final trendingProvider =
+    StateNotifierProvider<MovieListNotifier, MovieListState>(
   (ref) => MovieListNotifier(ref.read(repoProvider), type: "trending"),
 );
 
@@ -95,6 +116,16 @@ final nowPlayingProvider =
 final topRatedProvider =
     StateNotifierProvider<MovieListNotifier, MovieListState>(
   (ref) => MovieListNotifier(ref.read(repoProvider), type: "toprated"),
+);
+
+final popularProvider =
+    StateNotifierProvider<MovieListNotifier, MovieListState>(
+  (ref) => MovieListNotifier(ref.read(repoProvider), type: "popular"),
+);
+
+final upcomingProvider =
+    StateNotifierProvider<MovieListNotifier, MovieListState>(
+  (ref) => MovieListNotifier(ref.read(repoProvider), type: "upcoming"),
 );
 
 // ===== DETAIL PROVIDERS =====
@@ -123,14 +154,37 @@ final recommendationsProvider =
   return ref.read(repoProvider).recommendations(id, 1);
 });
 
-// ===== GENRES & DISCOVER =====
+// ===== REVIEWS (TMDB) =====
+final movieReviewsProvider =
+    FutureProvider.family<List<Review>, int>((ref, movieId) {
+  return ref.read(repoProvider).reviews(movieId, page: 1);
+});
 
-/// Lấy toàn bộ danh sách thể loại để show dưới dạng chip filter
+// ===== WATCH PROVIDERS (TMDB) =====
+/// Map locale -> region (VI->VN, EN->US, JA->JP)
+String _regionFromLocale(Locale locale) {
+  switch (locale.languageCode) {
+    case 'vi':
+      return 'VN';
+    case 'ja':
+      return 'JP';
+    default:
+      return 'US';
+  }
+}
+
+final watchProvidersProvider =
+    FutureProvider.family<WatchProvidersResult?, int>((ref, movieId) async {
+  final locale = ref.watch(settingsProvider).locale;
+  final region = _regionFromLocale(locale);
+  return ref.read(repoProvider).watchProviders(movieId, region: region);
+});
+
+// ===== GENRES & DISCOVER =====
 final genresProvider = FutureProvider<List<Genre>>((ref) {
   return ref.read(repoProvider).genres();
 });
 
-/// State cho Discover filter (selected genres, year, minVote, sort)
 class DiscoverFilterState {
   final List<Genre> allGenres;
   final List<int> selectedGenreIds;
@@ -138,7 +192,7 @@ class DiscoverFilterState {
   final double? minVote;
   final String sortBy;
 
-  DiscoverFilterState({
+  const DiscoverFilterState({
     this.allGenres = const [],
     this.selectedGenreIds = const [],
     this.year,
@@ -163,9 +217,8 @@ class DiscoverFilterState {
   }
 }
 
-/// Notifier quản lý filter cho Discover
 class DiscoverFilterNotifier extends StateNotifier<DiscoverFilterState> {
-  DiscoverFilterNotifier(this._repo) : super(DiscoverFilterState()) {
+  DiscoverFilterNotifier(this._repo) : super(const DiscoverFilterState()) {
     _init();
   }
 
@@ -186,17 +239,9 @@ class DiscoverFilterNotifier extends StateNotifier<DiscoverFilterState> {
     state = state.copyWith(selectedGenreIds: current);
   }
 
-  void setYear(int? year) {
-    state = state.copyWith(year: year);
-  }
-
-  void setMinVote(double? vote) {
-    state = state.copyWith(minVote: vote);
-  }
-
-  void setSortBy(String sortBy) {
-    state = state.copyWith(sortBy: sortBy);
-  }
+  void setYear(int? year) => state = state.copyWith(year: year);
+  void setMinVote(double? vote) => state = state.copyWith(minVote: vote);
+  void setSortBy(String sortBy) => state = state.copyWith(sortBy: sortBy);
 
   void reset() {
     state = DiscoverFilterState(allGenres: state.allGenres);
@@ -208,16 +253,13 @@ final discoverFilterProvider =
   (ref) => DiscoverFilterNotifier(ref.read(repoProvider)),
 );
 
-/// Kết quả Discover theo filter hiện tại
 final discoverResultsProvider = FutureProvider<List<Movie>>((ref) async {
   final repo = ref.read(repoProvider);
   final filter = ref.watch(discoverFilterProvider);
 
   return repo.discover(
     page: 1,
-    genreIds: filter.selectedGenreIds.isEmpty
-        ? null
-        : filter.selectedGenreIds,
+    genreIds: filter.selectedGenreIds.isEmpty ? null : filter.selectedGenreIds,
     year: filter.year,
     minVote: filter.minVote,
     sortBy: filter.sortBy,
@@ -225,20 +267,16 @@ final discoverResultsProvider = FutureProvider<List<Movie>>((ref) async {
 });
 
 // ===== PEOPLE =====
-
-/// Danh sách người nổi tiếng
 final popularPeopleProvider =
     FutureProvider.autoDispose<List<Person>>((ref) async {
   return ref.read(repoProvider).popularPeople(1);
 });
 
-/// Chi tiết người nổi tiếng
 final personDetailProvider =
     FutureProvider.family<PersonDetail, int>((ref, id) {
   return ref.read(repoProvider).personDetail(id);
 });
 
-/// Movie credits của 1 người (đã tham gia phim nào)
 final personCreditsProvider =
     FutureProvider.family<List<Movie>, int>((ref, id) {
   return ref.read(repoProvider).personMovieCredits(id);

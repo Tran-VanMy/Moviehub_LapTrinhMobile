@@ -1,7 +1,9 @@
 // Path: lib/features/movies/presentation/pages/search_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:moviehub/features/movies/presentation/providers/movie_providers.dart';
+
+import '../../../../core/i18n/app_i18n.dart';
+import '../providers/movie_providers.dart';
 import '../widgets/movie_card.dart';
 
 final searchQueryProvider = StateProvider<String>((ref) => "");
@@ -16,11 +18,12 @@ class SearchPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final i18n = AppI18n.of(context);
     final query = ref.watch(searchQueryProvider);
     final resultsAsync = ref.watch(searchResultsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Search Movies")),
+      appBar: AppBar(title: Text(i18n.t("search"))),
       body: Column(
         children: [
           Padding(
@@ -28,21 +31,24 @@ class SearchPage extends ConsumerWidget {
             child: TextField(
               onChanged: (v) => ref.read(searchQueryProvider.notifier).state = v,
               decoration: InputDecoration(
-                hintText: "Type movie name...",
+                hintText: "${i18n.t("search")}...",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
           ),
           Expanded(
             child: resultsAsync.when(
               data: (movies) => movies.isEmpty && query.isNotEmpty
-                  ? const Center(child: Text("No results."))
+                  ? Center(child: Text(i18n.t("no_results")))
                   : ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemBuilder: (_, i) => MovieCard(movie: movies[i], isHorizontal: true),
+                      itemBuilder: (_, i) =>
+                          MovieCard(movie: movies[i], isHorizontal: true),
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemCount: movies.length,
                     ),

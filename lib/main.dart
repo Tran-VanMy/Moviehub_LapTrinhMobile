@@ -9,9 +9,10 @@ import 'core/constants.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Init Hive for offline watchlist storage
   await Hive.initFlutter();
   await Hive.openBox<Map>(AppConstants.watchlistBox);
+  await Hive.openBox<Map>(AppConstants.favoriteBox);
+  await Hive.openBox(AppConstants.settingsBox);
 
   runApp(const ProviderScope(child: MovieHubApp()));
 }

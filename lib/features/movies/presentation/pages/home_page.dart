@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/i18n/app_i18n.dart';
 import '../../../../core/router.dart';
+import '../../../../core/settings/settings_provider.dart';
 import '../providers/movie_providers.dart';
 import '../widgets/section_header.dart';
 import '../widgets/movie_card.dart';
@@ -13,10 +15,15 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final i18n = AppI18n.of(context);
+
     final trending = ref.watch(trendingProvider);
     final nowPlaying = ref.watch(nowPlayingProvider);
     final topRated = ref.watch(topRatedProvider);
+    final popular = ref.watch(popularProvider);
+    final upcoming = ref.watch(upcomingProvider);
 
+    final palette = ref.watch(settingsProvider).palette;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -26,109 +33,83 @@ class HomePage extends ConsumerWidget {
             ref.invalidate(trendingProvider);
             ref.invalidate(nowPlayingProvider);
             ref.invalidate(topRatedProvider);
+            ref.invalidate(popularProvider);
+            ref.invalidate(upcomingProvider);
           },
           child: ListView(
             padding: const EdgeInsets.only(bottom: 24),
             children: [
-              // ===== Header mới: có tagline + các icon hành động =====
+              // ===== Header + actions =====
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        gradient: palette.gradient,
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.movie_filter_rounded,
                         size: 26,
-                        color: theme.colorScheme.primary,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "MovieHub",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        Text(
+                          i18n.t("app_name"),
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
                         ),
                         Text(
-                          "Khám phá phim chất lượng từ TMDB",
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey.shade600,
-                          ),
+                          "TMDB • Flutter • Riverpod",
+                          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                         ),
                       ],
                     ),
                     const Spacer(),
                     IconButton(
-                      tooltip: "Search",
+                      tooltip: i18n.t("search"),
                       icon: const Icon(Icons.search_rounded),
-                      onPressed: () =>
-                          Navigator.pushNamed(context, AppRouter.search),
+                      onPressed: () => Navigator.pushNamed(context, AppRouter.search),
                     ),
                     IconButton(
-                      tooltip: "Discover",
+                      tooltip: i18n.t("discover"),
                       icon: const Icon(Icons.explore_rounded),
-                      onPressed: () =>
-                          Navigator.pushNamed(context, AppRouter.discover),
+                      onPressed: () => Navigator.pushNamed(context, AppRouter.discover),
                     ),
                     IconButton(
-                      tooltip: "Watchlist",
-                      icon: const Icon(Icons.bookmark_rounded),
-                      onPressed: () =>
-                          Navigator.pushNamed(context, AppRouter.watchlist),
+                      tooltip: i18n.t("settings"),
+                      icon: const Icon(Icons.settings_rounded),
+                      onPressed: () => Navigator.pushNamed(context, AppRouter.settings),
                     ),
                   ],
                 ),
               ),
 
-              // ===== Banner nhỏ giới thiệu =====
+              // ===== Gradient banner =====
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  elevation: 0.7,
+                  elevation: 0.9,
                   child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
-                      gradient: LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary.withOpacity(0.95),
-                          theme.colorScheme.primary.withOpacity(0.75),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      gradient: palette.gradient,
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.star_rounded,
-                          color: Colors.amber,
-                          size: 30,
-                        ),
+                        const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 30),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            "Tìm kiếm, lọc phim theo thể loại, năm, điểm đánh giá và nhiều hơn nữa với Discover.",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              height: 1.4,
-                            ),
+                            "Discover • Reviews • Watch Providers • Favorites",
+                            style: const TextStyle(color: Colors.white, fontSize: 12, height: 1.4),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -136,21 +117,12 @@ class HomePage extends ConsumerWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: theme.colorScheme.primary,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           ),
-                          onPressed: () =>
-                              Navigator.pushNamed(context, AppRouter.discover),
+                          onPressed: () => Navigator.pushNamed(context, AppRouter.discover),
                           icon: const Icon(Icons.explore_rounded, size: 18),
-                          label: const Text(
-                            "Discover",
-                            style: TextStyle(fontSize: 12),
-                          ),
+                          label: Text(i18n.t("discover"), style: const TextStyle(fontSize: 12)),
                         ),
                       ],
                     ),
@@ -160,97 +132,145 @@ class HomePage extends ConsumerWidget {
 
               const SizedBox(height: 10),
 
+              // Quick buttons: Watchlist & Favorites & People
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.pushNamed(context, AppRouter.watchlist),
+                        icon: const Icon(Icons.bookmark_rounded),
+                        label: Text(i18n.t("watchlist")),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.pushNamed(context, AppRouter.favorites),
+                        icon: const Icon(Icons.favorite_rounded),
+                        label: Text(i18n.t("favorites")),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, AppRouter.people),
+                  icon: const Icon(Icons.people_alt_rounded),
+                  label: Text(i18n.t("popular_people")),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
               // ===== Trending Today =====
               SectionHeader(
-                title: "🔥 Trending Today",
+                title: "🔥 ${i18n.t("trending_today")}",
                 trailingIcon: Icons.local_fire_department_rounded,
                 onSeeAll: () => Navigator.pushNamed(
                   context,
                   AppRouter.allMovies,
-                  arguments: {
-                    "title": "Trending Today",
-                    "type": "trending",
-                  },
+                  arguments: {"title": i18n.t("trending_today"), "type": "trending"},
                 ),
               ),
               trending.movies.isEmpty
                   ? const ShimmerList()
                   : _TrendingCarousel(
                       movies: trending.movies,
-                      onLoadMore: () =>
-                          ref.read(trendingProvider.notifier).fetchNext(),
+                      onLoadMore: () => ref.read(trendingProvider.notifier).fetchNext(),
                     ),
 
               const SizedBox(height: 8),
 
-
-              // ===== People short cut =====
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: OutlinedButton.icon(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, AppRouter.people),
-                  icon: const Icon(Icons.people_alt_rounded),
-                  label: const Text("Khám phá người nổi tiếng"),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 10),
-
               // ===== Now Playing =====
               SectionHeader(
-                title: "🎬 Now Playing",
+                title: "🎬 ${i18n.t("now_playing")}",
                 trailingIcon: Icons.play_circle_fill_rounded,
                 onSeeAll: () => Navigator.pushNamed(
                   context,
                   AppRouter.allMovies,
-                  arguments: {
-                    "title": "Now Playing",
-                    "type": "nowplaying",
-                  },
+                  arguments: {"title": i18n.t("now_playing"), "type": "nowplaying"},
                 ),
               ),
               nowPlaying.movies.isEmpty
                   ? const ShimmerList()
                   : _VerticalMovieList(
                       movies: nowPlaying.movies,
-                      onLoadMore: () =>
-                          ref.read(nowPlayingProvider.notifier).fetchNext(),
+                      onLoadMore: () => ref.read(nowPlayingProvider.notifier).fetchNext(),
                     ),
 
               const SizedBox(height: 8),
 
               // ===== Top Rated =====
               SectionHeader(
-                title: "⭐ Top Rated",
+                title: "⭐ ${i18n.t("top_rated")}",
                 trailingIcon: Icons.emoji_events_rounded,
                 onSeeAll: () => Navigator.pushNamed(
                   context,
                   AppRouter.allMovies,
-                  arguments: {
-                    "title": "Top Rated",
-                    "type": "toprated",
-                  },
+                  arguments: {"title": i18n.t("top_rated"), "type": "toprated"},
                 ),
               ),
               topRated.movies.isEmpty
                   ? const ShimmerList()
                   : _VerticalMovieList(
                       movies: topRated.movies,
-                      onLoadMore: () =>
-                          ref.read(topRatedProvider.notifier).fetchNext(),
+                      onLoadMore: () => ref.read(topRatedProvider.notifier).fetchNext(),
                     ),
 
               const SizedBox(height: 8),
 
+              // ===== Popular =====
+              SectionHeader(
+                title: "✨ ${i18n.t("popular")}",
+                trailingIcon: Icons.trending_up_rounded,
+                onSeeAll: () => Navigator.pushNamed(
+                  context,
+                  AppRouter.allMovies,
+                  arguments: {"title": i18n.t("popular"), "type": "popular"},
+                ),
+              ),
+              popular.movies.isEmpty
+                  ? const ShimmerList()
+                  : _VerticalMovieList(
+                      movies: popular.movies,
+                      onLoadMore: () => ref.read(popularProvider.notifier).fetchNext(),
+                    ),
 
+              const SizedBox(height: 8),
+
+              // ===== Upcoming =====
+              SectionHeader(
+                title: "🗓️ ${i18n.t("upcoming")}",
+                trailingIcon: Icons.calendar_month_rounded,
+                onSeeAll: () => Navigator.pushNamed(
+                  context,
+                  AppRouter.allMovies,
+                  arguments: {"title": i18n.t("upcoming"), "type": "upcoming"},
+                ),
+              ),
+              upcoming.movies.isEmpty
+                  ? const ShimmerList()
+                  : _VerticalMovieList(
+                      movies: upcoming.movies,
+                      onLoadMore: () => ref.read(upcomingProvider.notifier).fetchNext(),
+                    ),
             ],
           ),
         ),
@@ -259,7 +279,6 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-/// List dọc cho Now Playing / Top Rated
 class _VerticalMovieList extends StatelessWidget {
   const _VerticalMovieList({required this.movies, required this.onLoadMore});
 
@@ -279,8 +298,7 @@ class _VerticalMovieList extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemBuilder: (_, i) =>
-            MovieCard(movie: movies[i], isHorizontal: true),
+        itemBuilder: (_, i) => MovieCard(movie: movies[i], isHorizontal: true),
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemCount: movies.length,
       ),
@@ -288,12 +306,8 @@ class _VerticalMovieList extends StatelessWidget {
   }
 }
 
-/// Carousel cho Trending Today với hai nút < >
 class _TrendingCarousel extends StatefulWidget {
-  const _TrendingCarousel({
-    required this.movies,
-    required this.onLoadMore,
-  });
+  const _TrendingCarousel({required this.movies, required this.onLoadMore});
 
   final List movies;
   final VoidCallback onLoadMore;
@@ -309,14 +323,12 @@ class _TrendingCarouselState extends State<_TrendingCarousel> {
   @override
   void initState() {
     super.initState();
-    // viewportFraction < 1 để các item hơi lộ ra hai bên cho đẹp
     _pageController = PageController(viewportFraction: 0.58);
   }
 
   @override
   void didUpdateWidget(covariant _TrendingCarousel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Nếu số lượng phim tăng thêm (fetchNext), giữ vị trí hiện tại
     if (_currentPage >= widget.movies.length) {
       _currentPage = widget.movies.length - 1;
     }
@@ -339,7 +351,6 @@ class _TrendingCarouselState extends State<_TrendingCarousel> {
       curve: Curves.easeOut,
     );
 
-    // Nếu đã gần cuối list thì gọi loadMore để lấy thêm trang
     if (index >= widget.movies.length - 3) {
       widget.onLoadMore();
     }
@@ -355,7 +366,6 @@ class _TrendingCarouselState extends State<_TrendingCarousel> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // PageView hiển thị các MovieCard
           PageView.builder(
             controller: _pageController,
             itemCount: widget.movies.length,
@@ -376,8 +386,6 @@ class _TrendingCarouselState extends State<_TrendingCarousel> {
               );
             },
           ),
-
-          // Nút < bên trái
           Positioned(
             left: 4,
             child: _ArrowButton(
@@ -386,8 +394,6 @@ class _TrendingCarouselState extends State<_TrendingCarousel> {
               onTap: () => _goToPage(_currentPage - 1),
             ),
           ),
-
-          // Nút > bên phải
           Positioned(
             right: 4,
             child: _ArrowButton(
@@ -402,13 +408,8 @@ class _TrendingCarouselState extends State<_TrendingCarousel> {
   }
 }
 
-/// Nút mũi tên tròn dùng chung
 class _ArrowButton extends StatelessWidget {
-  const _ArrowButton({
-    required this.icon,
-    required this.enabled,
-    required this.onTap,
-  });
+  const _ArrowButton({required this.icon, required this.enabled, required this.onTap});
 
   final IconData icon;
   final bool enabled;
@@ -417,20 +418,14 @@ class _ArrowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: enabled
-          ? Colors.black.withOpacity(0.5)
-          : Colors.black.withOpacity(0.2),
+      color: enabled ? Colors.black.withOpacity(0.5) : Colors.black.withOpacity(0.2),
       shape: const CircleBorder(),
       child: InkWell(
         onTap: enabled ? onTap : null,
         customBorder: const CircleBorder(),
         child: Padding(
           padding: const EdgeInsets.all(6),
-          child: Icon(
-            icon,
-            size: 24,
-            color: Colors.white,
-          ),
+          child: Icon(icon, size: 24, color: Colors.white),
         ),
       ),
     );

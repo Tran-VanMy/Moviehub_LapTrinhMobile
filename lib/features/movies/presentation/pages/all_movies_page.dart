@@ -9,11 +9,8 @@ import '../widgets/movie_card.dart';
 class AllMoviesPage extends ConsumerStatefulWidget {
   const AllMoviesPage({super.key, required this.title, required this.type});
 
-  /// Tiêu đề hiển thị: ví dụ "Trending Today"
   final String title;
-
-  /// Loại list: "trending", "nowplaying", "toprated"
-  final String type;
+  final String type; // trending, nowplaying, toprated, popular, upcoming
 
   @override
   ConsumerState<AllMoviesPage> createState() => _AllMoviesPageState();
@@ -56,12 +53,25 @@ class _AllMoviesPageState extends ConsumerState<AllMoviesPage> {
       }
 
       List<dynamic> newMovies;
-      if (widget.type == "trending") {
-        newMovies = await _repo.trending(_page);
-      } else if (widget.type == "nowplaying") {
-        newMovies = await _repo.nowPlaying(_page);
-      } else {
-        newMovies = await _repo.topRated(_page);
+
+      switch (widget.type) {
+        case "trending":
+          newMovies = await _repo.trending(_page);
+          break;
+        case "nowplaying":
+          newMovies = await _repo.nowPlaying(_page);
+          break;
+        case "toprated":
+          newMovies = await _repo.topRated(_page);
+          break;
+        case "popular":
+          newMovies = await _repo.popular(_page);
+          break;
+        case "upcoming":
+          newMovies = await _repo.upcoming(_page);
+          break;
+        default:
+          newMovies = [];
       }
 
       setState(() {
@@ -89,9 +99,7 @@ class _AllMoviesPageState extends ConsumerState<AllMoviesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: RefreshIndicator(
         onRefresh: () => _fetch(refresh: true),
         child: ListView.separated(

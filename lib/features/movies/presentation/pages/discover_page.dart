@@ -333,7 +333,7 @@ class _SortDropdown extends ConsumerWidget {
         ),
         const SizedBox(height: 4),
         DropdownButtonFormField<String>(
-          value: current,
+          initialValue: current,
           decoration: InputDecoration(
             isDense: true,
             prefixIcon: const Icon(Icons.sort_rounded, size: 18),

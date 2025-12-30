@@ -1,6 +1,7 @@
 // Path: lib/features/movies/data/tmdb_api.dart
 import 'package:dio/dio.dart';
 import '../../../core/network/dio_client.dart';
+
 import 'models/movie.dart';
 import 'models/movie_detail.dart';
 import 'models/cast.dart';
@@ -8,6 +9,10 @@ import 'models/video.dart';
 import 'models/genre.dart';
 import 'models/person.dart';
 import 'models/person_detail.dart';
+
+// NEW
+import 'models/review.dart';
+import 'models/watch_provider.dart';
 
 /// Tầng gọi TMDB API.
 /// Tất cả request sẽ dùng Dio đã cấu hình sẵn Bearer Token ở DioClient.
@@ -48,6 +53,16 @@ class TmdbApi {
   Future<List<Movie>> getTopRated({int page = 1}) =>
       _fetchMovieList("/movie/top_rated", page: page);
 
+  /// Popular
+  /// API: GET /movie/popular
+  Future<List<Movie>> getPopular({int page = 1}) =>
+      _fetchMovieList("/movie/popular", page: page);
+
+  /// Upcoming
+  /// API: GET /movie/upcoming
+  Future<List<Movie>> getUpcoming({int page = 1}) =>
+      _fetchMovieList("/movie/upcoming", page: page);
+
   /// Search movie theo từ khóa
   /// API: GET /search/movie
   Future<List<Movie>> searchMovies(
@@ -87,19 +102,40 @@ class TmdbApi {
 
   /// Similar movies
   /// API: GET /movie/{movie_id}/similar
-  Future<List<Movie>> getSimilar(
-    int movieId, {
-    int page = 1,
-  }) =>
+  Future<List<Movie>> getSimilar(int movieId, {int page = 1}) =>
       _fetchMovieList("/movie/$movieId/similar", page: page);
 
-  /// Recommendations – gợi ý phim dựa trên 1 movie_id
+  /// Recommendations
   /// API: GET /movie/{movie_id}/recommendations
-  Future<List<Movie>> getRecommendations(
-    int movieId, {
-    int page = 1,
-  }) =>
+  Future<List<Movie>> getRecommendations(int movieId, {int page = 1}) =>
       _fetchMovieList("/movie/$movieId/recommendations", page: page);
+
+  /// Reviews (comment thật từ TMDB)
+  /// API: GET /movie/{movie_id}/reviews
+  Future<List<Review>> getReviews(int movieId, {int page = 1}) async {
+    final res = await _dio.get("/movie/$movieId/reviews", queryParameters: {
+      "page": page,
+    });
+    final list = (res.data["results"] as List? ?? []);
+    return list.map((e) => Review.fromJson(e)).toList();
+  }
+
+  /// Watch Providers – phim xem ở đâu (Netflix/Disney+/Prime…)
+  /// API: GET /movie/{movie_id}/watch/providers
+  ///
+  /// region: "VN", "US", "JP"...
+  Future<WatchProvidersResult?> getWatchProviders(
+    int movieId, {
+    required String region,
+  }) async {
+    final res = await _dio.get("/movie/$movieId/watch/providers");
+    final results = (res.data["results"] as Map?) ?? {};
+    final regionJson = results[region];
+    if (regionJson == null) return null;
+    return WatchProvidersResult.fromRegionJson(
+      Map<String, dynamic>.from(regionJson),
+    );
+  }
 
   // ================= DISCOVER & GENRES =================
 
@@ -111,13 +147,7 @@ class TmdbApi {
     return list.map((e) => Genre.fromJson(e)).toList();
   }
 
-  /// Discover movie nâng cao:
-  /// Cho phép filter theo:
-  /// - with_genres: list id thể loại (ngăn cách bằng dấu phẩy)
-  /// - primary_release_year: năm phát hành chính
-  /// - vote_average.gte: điểm đánh giá tối thiểu
-  /// - sort_by: tiêu chí sắp xếp (vd: popularity.desc, vote_average.desc,...)
-  ///
+  /// Discover movie nâng cao
   /// API: GET /discover/movie
   Future<List<Movie>> discoverMovies({
     int page = 1,
@@ -146,7 +176,7 @@ class TmdbApi {
 
   // ================= PEOPLE =================
 
-  /// People nổi tiếng (Popular People)
+  /// People nổi tiếng
   /// API: GET /person/popular
   Future<List<Person>> getPopularPeople({int page = 1}) async {
     final res = await _dio.get("/person/popular", queryParameters: {
@@ -163,12 +193,11 @@ class TmdbApi {
     return PersonDetail.fromJson(res.data);
   }
 
-  /// Danh sách movie mà người này tham gia (movie credits)
+  /// Danh sách movie mà người này tham gia
   /// API: GET /person/{person_id}/movie_credits
   Future<List<Movie>> getPersonMovieCredits(int personId) async {
     final res = await _dio.get("/person/$personId/movie_credits");
     final castList = (res.data["cast"] as List? ?? []);
-    // parse tương tự Movie
     return castList.map((e) => Movie.fromJson(e)).toList();
   }
 }

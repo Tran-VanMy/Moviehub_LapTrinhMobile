@@ -75,6 +75,22 @@ Docs: https://developer.themoviedb.org/reference/person-movie-credits?utm_source
 GET /search/movie 
 Docs: https://developer.themoviedb.org/docs/getting-started?utm_source=chatgpt.com
 
+- Reviews (comment thật từ TMDB):
+GET /movie/{movie_id}/reviews
+Docs: https://developer.themoviedb.org/reference/movie-reviews
+
+- Watch Providers – phim xem ở đâu:
+GET /movie/{movie_id}/watch/providers
+Docs: https://developer.themoviedb.org/reference/movie-watch-providers
+
+- Popular (phim phổ biến):
+GET /movie/popular
+Docs: https://developer.themoviedb.org/reference/movie-popular-list
+
+- Upcoming (phim sắp chiếu):
+GET /movie/upcoming
+Docs: https://developer.themoviedb.org/reference/movie-upcoming-list
+
 - Image Base URL (Lấy poster, backdrop, avatar): 
 Link: https://image.tmdb.org/t/p/w500
 Docs: https://developer.themoviedb.org/docs/image-basics?utm_source=chatgpt.com
@@ -88,4 +104,8 @@ Tổng kết API mà project MovieHub đã dùng (Full List):
 | Discover     | Discover Movies                                     |
 | Genres       | List Genres                                         |
 | People       | Popular People, Person Detail, Person Movie Credits |
+| Reviews      | reviews                                             |
+| Watch Provi  | providers                                           |
+| Popular      | popular                                             |
+| Upcoming     | upcoming                                            |
 | Images       | Base Image URL                                      |
